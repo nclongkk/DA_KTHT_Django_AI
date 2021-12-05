@@ -76,5 +76,9 @@ def identify(request, id=0):
         ext = format.split('/')[-1]
         img = Image.open(io.BytesIO(
             base64.decodebytes(bytes(imgstr, "utf-8"))))
-        img.save(f'my-image.{ext}')
+        f = open("../FaceRecog/image/image.txt", "w")
+        f.write(imgstr)
+        f.close()
+        command = "python ../FaceRecog/src/face_rec.py"
+        os.system(command)
         return JsonResponse("received successfully", safe=False)
