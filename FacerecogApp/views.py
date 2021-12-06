@@ -20,6 +20,7 @@ import io
 from django.core.files.base import ContentFile
 from PIL import Image
 import os
+import subprocess
 Image.LOAD_TRUNCATED_IMAGES = True
 # Create your views here.
 
@@ -72,7 +73,6 @@ def identify(request, id=0):
         string = data['photo']
         string += '=' * (-len(string) % 4)
         format, imgstr = string.split(';base64,')
-        print(imgstr)
         ext = format.split('/')[-1]
         img = Image.open(io.BytesIO(
             base64.decodebytes(bytes(imgstr, "utf-8"))))
@@ -80,5 +80,12 @@ def identify(request, id=0):
         f.write(imgstr)
         f.close()
         command = "python ../FaceRecog/src/face_rec.py"
-        os.system(command)
-        return JsonResponse("received successfully", safe=False)
+
+         # subprocess.run([command], check=True)
+         # os.system(command)
+        output = subprocess.check_output(command, shell=True)
+        best_name = output.decode("utf-8").split("\n")[-2]
+        if(best_name != "Unknown"):
+            return JsonResponse("received successfully", safe=False, status=200)
+        else:
+            return JsonResponse({'status': 'Not Found'}, status=400)
