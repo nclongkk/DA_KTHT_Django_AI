@@ -71,6 +71,7 @@ def identify(request, id=0):
     if request.method == 'POST':
         data = JSONParser().parse(request)
         string = data['photo']
+        groupId = data['groupId']
         string += '=' * (-len(string) % 4)
         format, imgstr = string.split(';base64,')
         ext = format.split('/')[-1]
@@ -79,12 +80,15 @@ def identify(request, id=0):
         f = open("../FaceRecog/image/image.txt", "w")
         f.write(imgstr)
         f.close()
-        command = "python ../FaceRecog/src/face_rec.py"
+        command = f"python ../FaceRecog/src/face_rec.py --groupId {groupId}"
 
-         # subprocess.run([command], check=True)
-         # os.system(command)
+        # subprocess.run([command], check=True)
+        # os.system(command)
+        
         output = subprocess.check_output(command, shell=True)
         best_name = output.decode("utf-8").split("\n")[-2]
+        print(command)
+        print(best_name)
         if(best_name != "Unknown"):
             return JsonResponse("received successfully", safe=False, status=200)
         else:
